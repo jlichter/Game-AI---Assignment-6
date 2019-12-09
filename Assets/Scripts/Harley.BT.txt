@@ -1,0 +1,63 @@
+tree("Harley")
+	parallel
+		repeat mute tree("CheckLevels")
+		repeat mute tree("DisplayMessage")
+tree("CheckLevels")
+	parallel
+		CheckHunger
+		CheckBoredom
+		CheckTiredness
+tree("DisplayMessage")
+	fallback
+		tree("Idle")
+		tree("Hunger")
+		tree("Tired")
+		tree("Boredom")
+		tree("Playing")
+		
+tree("Hunger")
+	fallback
+		while isHungry
+			sequence
+				Say("Harley is hungry.")
+				Running
+tree("Boredom")
+	fallback
+		while 
+			sequence
+				not isHungry
+				not isPlaying
+				not isTired
+			sequence
+				isBored
+				Say("Harley wants to play fetch.")
+				Running
+tree("Playing")
+	fallback
+		sequence
+			isPlaying
+			Say("Its time to play some fetch with Harley!")
+			Wait(1.0)
+			repeat 4
+				sequence
+					Say("Owner throws the ball, Harley goes to get it ...")
+					IncreaseFun(5)
+					IncreaseTiredness(1)
+					Wait(2.0)
+					Say("Harley brought the ball back!")
+			Say("Harley's done playing for now.")
+			DonePlaying
+tree("Tired")
+	fallback
+		
+tree("Idle")
+	repeat
+		sequence
+			not isHungry
+			not isBored
+			not isPlaying
+
+
+
+
+	

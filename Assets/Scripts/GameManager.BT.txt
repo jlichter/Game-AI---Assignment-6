@@ -1,0 +1,12 @@
+tree("Root")
+	parallel
+		UpdateTime
+		tree("Harley")
+		fallback
+			tree("Feeding")
+tree("Feeding")
+	sequence 
+		IsFillingBowl
+		OutputEating
+		Wait(1.0)
+		OutputDoneEating

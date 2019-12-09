@@ -1,0 +1,13 @@
+tree("Root")
+	parallel
+		repeat mute TakeInput
+		mute AdvanceTime
+		mute tree("HandleInput")
+		mute tree("Harley")
+tree("HandleInput")
+	race
+		FillBowl
+		PlayFetch
+		AdvanceHour
+		AdvanceMinute
+	
