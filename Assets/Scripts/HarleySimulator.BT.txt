@@ -1,13 +1,204 @@
 tree("Root")
 	parallel
-		repeat mute TakeInput
-		mute AdvanceTime
-		mute tree("HandleInput")
-		mute tree("Harley")
-tree("HandleInput")
-	race
-		FillBowl
-		PlayFetch
-		AdvanceHour
+		mute tree("GameOver")
+		while not gameOver // while the game isn't over, constantly check for input 
+			parallel
+				repeat mute AdvanceTime
+				mute tree("Harley")
+				repeat mute tree("FillBowl")
+				repeat mute tree("GiveTreat")
+				repeat mute tree("ThrowBall")
+				repeat mute tree("Pet")
+				repeat mute tree("BellyRub")
+				repeat mute tree("Walk")
+				repeat mute tree("LeaveAlone")
+				repeat mute tree("GoToWork")
+				repeat mute tree("ArriveHome")
+				repeat mute tree("WorkTime")
+				repeat mute tree("AdvanceMinutes")
+				repeat mute tree("AdvanceHour")
+				repeat mute tree("AdvanceDay")
+				repeat mute tree("MysteriousSound")
+
+tree("GameOver")
+	Sequence
+		gameOver
+		GameOverScreen
+
+		
+/* the following behavior trees are for player input. when player hits a certain key,
+the tree corresponding to that key is enacted. */
+
+tree("FillBowl")
+	Sequence
+		PressedF
+		fallback
+			Sequence
+				isAtWork
+				Say("You can't fill Harley's bowl while you're at work.")
+			Sequence
+				bowlTooFull
+				Say("The bowl looks too full to be filled right now.")
+			Sequence
+				isEating
+				Say("You can't fill the bowl while harley is eating.")
+			Sequence
+				isPlaying
+				Say("You can't fill the dog bowl while you're playing with Harley!")
+			Sequence
+				Say("You fill Harley's bowl with food.")
+				FillBowl
+tree("GiveTreat")
+	Sequence
+		PressedT
+		fallback
+			Sequence
+				isAtWork
+				Say("You can't give Harley a treat while you're at work.")
+			Sequence
+				isPlaying
+				Say("Harley doesn't want a treat right now, she wants to keep playing!")
+			Sequence
+				tree("EatTreat")
+tree("ThrowBall")
+	Sequence
+		PressedK
+		fallback
+			Sequence
+				isAtWork
+				Say("You can't play with Harley a treat while you're at work.")
+			Sequence
+				isHungry
+				Say("Harley is too hungry to play right now.")
+			Sequence
+				isTired
+				Say("Harley is too tired to play right now.")
+			Sequence
+				tree("PlayBall")
+tree("Pet")
+	Sequence
+		PressedP
+		fallback
+			Sequence
+				isAtWork
+				Say("You can't pet harley while you're at work!")
+			Sequence
+				isStarving
+				Say("Harley snaps at your fingers. Ouch!")
+			Sequence
+				isSleeping
+				Wait(1.0)
+				random
+					Say("You nuzzle harley's ears as she rests.")
+					Say("You pet the sleepy pup on her head. Sweet dreams.")
+			Sequence
+				tooMuchAttention
+				Wait(0.5)
+				random 0.6, 0.4
+					Say("Harley does not want to be pet right now.")
+					Say("Harley doesn't want so much attention.")
+			Sequence
+				random
+					Say("You nuzzle Harley behind her ears.")
+					Say("You pat Harley on the head.")
+					Say("You stroke Harley's back.")
+				tree("RespondToPetting")
+tree("BellyRub")
+	Sequence
+		PressedB
+		fallback
+			Sequence
+				isAtWork
+				Say("You can't rub harley's belly while you're at work!")
+			Sequence
+				isStarving
+				Say("Harley hides her belly and bares her teeth. Yikes!")
+			Sequence
+				isSleeping
+				Wait(1.0)
+				Say("You're about to pet harley's belly, but she's so peaceful in her sleep.")
+			Sequence
+				tooMuchAttention
+				Wait(0.5)
+				random 0.6, 0.4
+					Say("Harley does not want a belly rub right now.")
+					Say("Harley doesn't want so much attention.")
+			Sequence
+				random
+					Say("You rub Harley's belly.")
+					Say("You give Harley's belly a good rub.")
+				tree("RespondToBellyRub")
+tree("Walk")
+	Sequence
+		PressedW
+		fallback
+			Sequence
+				isAtWork
+				Say("You can't let harley out while you're at work.")
+			Sequence
+				Say("You whistle for Harley to go out.")
+				Wait(2.0)
+				tree("GoOut")
+tree("LeaveAlone")
+	Sequence
+		PressedL
+		fallback
+			Sequence
+				isAtWork
+				Say("You can't leave Harley alone when you're not there to bother her.")
+			Sequence
+				isStarving
+				Say("Harley wants food more than rest now. She is starving!")
+			Sequence
+				not isTired
+				Say("Harley doesn't want to be left alone right now.")
+			Sequence
+				isTired
+				tree("Sleep")
+tree("GoToWork")
+	Sequence
+		PressedG
+		fallBack
+			Sequence
+				isAtWork
+				Say("You are already at work!")
+			Sequence
+				GoToWork
+				Say("You leave for work.")
+tree("ArriveHome")
+	Sequence
+		PressedA
+		fallback
+			Sequence
+				not isAtWork
+				Say("You are already home.")
+			Sequence
+				isAtWork
+				Say("You come back home from work.")
+				ArriveHome
+tree("WorkTime")
+	while isAtWork
+		StartTimeAway
+tree("AdvanceMinutes")
+	Sequence
+		PressedI
+		Say("Time advanced 15 minutes.")
 		AdvanceMinute
+tree("AdvanceHour")
+	Sequence
+		PressedH
+		Say("Time advanced 1 hour.")
+		AdvanceHour
+tree("AdvanceDay")
+	Sequence
+		PressedD
+		Say("Time advanced one day.")
+		AdvanceDay
+tree("MysteriousSound")
+	Sequence
+		PressedS
+		tree("RespondToSound")
+				
+
+			
 	

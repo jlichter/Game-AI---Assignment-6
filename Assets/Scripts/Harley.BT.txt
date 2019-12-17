@@ -1,61 +1,349 @@
 tree("Harley")
 	parallel
 		repeat mute tree("CheckLevels")
-		repeat mute tree("DisplayMessage")
+		repeat mute tree("SleepTime")
+		repeat mute tree("OwnerGone")
+		repeat mute tree("Eat")
+		repeat mute tree("PottyAccident")
+		repeat mute tree("RespondToLevels")
+		mute DisplayLevels
+
+/* behavior tree for constantly checking harley's levels */
 tree("CheckLevels")
 	parallel
 		CheckHunger
-		CheckBoredom
+		CheckBowl
+		CheckPotty
 		CheckTiredness
-tree("DisplayMessage")
-	fallback
-		tree("Idle")
-		tree("Hunger")
-		tree("Tired")
-		tree("Boredom")
-		tree("Playing")
-		
+		CheckBoredom
+		CheckLoneliness
+		CheckTimeOfDay // for sleeping, if its later in the day harley will sleep longer
+		CheckTimeAway // for when the owner goes to work, harley will be more agitated longer owner is gone
+
+/* behavior tree for always checking if harley is sleeping or not.
+will update the time she is sleeping if so, and, when she is done sleeping,
+will end this time. */
+tree("SleepTime")
+	while isSleeping
+			parallel
+				CheckSleepTime
+				StartSleepTime
+				Sequence
+					Wait(30.0)
+					random
+						Say("Harley sleeps peacefully.")
+						Say("Harley twitches in her sleep. Looks like shes having a bad dream.")
+						Say("Harley groans in her sleep.")
+						Say("Harley's eyes flutter. Wonder what she's dreaming about.")
+tree("OwnerGone")
+	Sequence
+		fallback
+			Sequence
+				isMoreLonely
+				Say("Harley paces around the house, wondering when you will be home.")
+				Wait(25.0)
+			Sequence
+				isVeryLonely
+				Say("Harley howls for you to come home. She feels abandoned!")
+				Wait(25.0)
+
+/* behavior tree for eating from the bowl. Harley will eat from the bowl
+   until it is empty if she is hungry or starving */
+tree("Eat")
+	Sequence
+		fallback
+			sequence
+				not isOutside // harley can't eat from bowl if outside
+				isStarving
+				bowlFilled
+				Say("Harley eats ravenously from the bowl.")
+				ChangeEatBool
+				EatFromBowl
+				ChangeEatBool
+			sequence
+				not isOutside // harley can't eat from bowl if outside
+				not isSleeping
+				isHungry
+				bowlFilled
+				Wait(1.5)
+				Say("Harley was hungry and eats from the bowl.")
+				ChangeEatBool
+				EatFromBowl
+				Wait(5.0)
+				ChangeEatBool
+			//Succeed
+
+/* behavior tree for when harley has a potty accident. if her bladder is too low,
+she will go the bathroom in the house and relieve herself. */
+tree("PottyAccident")
+	Sequence
+		fallback
+			sequence
+				not isOutside
+				not isSleeping
+				peedInside
+				GoToBathroom(30)
+				random(0.75,0.05,0.20)
+					Say("Harley peed on the carpet.")
+					Say("Harley left a surprise bathrrom bomb in the livingroom.")
+					Say("Harley peed on the bed.")
+				ChangePeedBool
+			Succeed
+
+/* behavior tree for responding to harley's levels. The trees are in order of priority, first
+being most important to last being least important (in this case, idle). The tree will fallback
+on the behavior that requires attention first. */
+tree("RespondToLevels")
+	Sequence
+		fallback
+			tree("Starving")
+			tree("Potty")
+			tree("Hunger")
+			tree("Boredom")
+			tree("Lonely")
+			tree("Tired")
+			tree("Idle")
+
+/* behavior tree for responding to harley's starvation. */
+tree("Starving")
+	Sequence
+		while isStarving
+			repeat
+				sequence
+					Say("Harley howls in hunger!")
+					Wait(4.0)
+
+/* behavior tree for responding to harley's bladder level. */
+tree("Potty")
+	Sequence
+		not isSleeping
+		not isPlaying
+		while needsPotty
+			sequence
+				not isSleeping
+				Say("Harley paces back and forth in front of the door.")
+				Wait(10.0)
+
+/* behavior tree for when harley is bored */
+tree("Boredom")
+	Sequence
+		not isPlaying
+		while isBored
+			sequence 
+				not isSleeping
+				random 0.7, 0.15,0.15
+					Say("Harley wants to  play fetch.")
+					Say("Harley looks like she wants to play.")
+					Say("Harley stares off in the distance, bored out of her mind.")
+				Wait(20.0)
+
+/* behavior tree for when harley is lonely */
+tree("Lonely")
+	Sequence
+		not isPlaying
+		while isLonely
+			sequence
+				not isSleeping
+				random
+					Say("Harley looks to you for attention.")
+					Say("Harley looks like she wants some love.")
+					Say("Harley looks so, so lonely.")
+				Wait(20.0)
+
+/* behavior tree for responding to harley's hunger. */
 tree("Hunger")
-	fallback
+	Sequence
 		while isHungry
 			sequence
-				Say("Harley is hungry.")
-				Running
-tree("Boredom")
-	fallback
-		while 
-			sequence
-				not isHungry
+				not isSleeping
+				not isOutside
 				not isPlaying
-				not isTired
-			sequence
-				isBored
-				Say("Harley wants to play fetch.")
-				Running
-tree("Playing")
-	fallback
+				random 
+					Say("Harley paws at her doggie bowl.")
+					Say("Harley looks like she wants a snack.")
+				Wait(20.0)
+
+/* behavior tree for when harley is tired */
+tree("Tired")
+	Sequence
+		while isTired
+			fallback
+				sequence
+					not isPlaying
+					needsNap
+					not isSleeping
+					Say("Harley yawns. It looks like she wants to take a nap.")
+					Wait(7.0)
+				sequence
+					not isPlaying
+					needsSleep
+					not isSleeping
+					Say("Harley yawns, looking at her doggie bed longingly.")
+					Wait(4.0)
+				Succeed
+
+/* behavior tree for when harley is idle */
+tree("Idle")
+	repeat
 		sequence
-			isPlaying
+			not isHungry
+			not isStarving
+			not needsPotty
+			not isTired
+			not isBored
+			not isPlaying		
+						
+/* behavior tree for playing ball on input "K". Harley will play ball unless she is sleeping
+or starving (for now). */
+tree("PlayBall")
+	fallback
+		Sequence
+			isSleeping
+			Say("You toss the ball over to Harley.")
+			Wait(0.5)
+			random
+				Say("ZZZZZZZZZZZ. Harley doesn't make a move for the ball.")
+				Say("Harley huffs and continues to sleep.")
+		Sequence
+			ChangePlayBool
 			Say("Its time to play some fetch with Harley!")
-			Wait(1.0)
+			Wait(1.5)
 			repeat 4
 				sequence
-					Say("Owner throws the ball, Harley goes to get it ...")
+					Wait(1.0)
+					Say("You throw the ball, Harley goes to get it ...")
 					IncreaseFun(5)
 					IncreaseTiredness(1)
 					Wait(2.0)
 					Say("Harley brought the ball back!")
 			Say("Harley's done playing for now.")
-			DonePlaying
-tree("Tired")
-	fallback
-		
-tree("Idle")
-	repeat
-		sequence
-			not isHungry
-			not isBored
-			not isPlaying
+			ChangePlayBool
+
+/* behavior tree for receiving a treat on input "T". Harley will always eat a treat. */
+tree("EatTreat")
+	Sequence	
+		fallback
+			sequence
+				tooFull
+				EatTreat(3)
+				Say("Harley pukes on the floor. It seems she's eaten too much.")
+				ChangeFullness(13)
+			sequence
+				not tooFull
+				Say("Harley eats the treat. Yum!")
+				EatTreat(3)
+
+/* behavior tree for being pet on input "P". Harley responds differently if sleeping 
+and will not want to be pet if she is receiving too much affection or if she is starving. */
+tree("RespondToPetting")
+	Sequence
+		not isOutside
+		ChangePetBool
+		Wait(1.0)
+		ReceivePetting(10)
+		random
+			Say("Harley looks at you with affection.")
+			Say("Harley licks your fingers.")
+		ChangePetBool
+
+/* behavior tree for being belly rubbed on input "B". Harley does not like to be belly rubbed
+if she is sleeping, is receiving too much affection, or is starving. */
+tree("RespondToBellyRub")
+	Sequence
+		not isOutside
+		Wait(1.0)
+		ReceiveBellyRub(15)
+		IncreaseFun(5)
+		random
+			Say("Harley kicks her leg repeatedly in the air.")
+			Say("Harley groans in happiness.")
+			Say("Harley lies happily on her back while you rub.")
+
+/* behavior tree for when harley goes to sleep on input "L". if she is tired, she will sleep.
+depending on the time of day, she will either take a nap or be out for a longer time. */
+tree("Sleep")
+	Sequence
+		fallback
+			sequence
+				needsSleep
+				ChangeSleepBool
+				Wait(2.0)
+				Say("Harley curls up in her dog bed. Time for sleep.")
+			sequence
+				needsNap
+				ChangeSleepBool
+				Wait(2.0)
+				random
+					Say("Harley curls into a ball and shuts her eyes. Time for a nap.")
+					Say("Harley doses off. Nap time.")
+
+/* behavior tree for going out with input "W". Harley will not want to go out if she is starving.
+If she has to go to the bathroom, she will relieve herself outside. If harley is outside and the 
+owner wants to play fetch, harley will play with a ball instead of a stick. */
+tree("GoOut")
+	Sequence
+		fallback
+			Sequence
+				isSleeping
+				Say("Harley is sound asleep.")
+			Sequence
+				isStarving
+				Say("Harley looks at you angrily and glances at the food bowl.")
+			Sequence
+				not isSleeping
+				needsPotty
+				ChangeIsOut
+				GoToBathroom(20)
+				IncreaseFun(8)
+				Wait(1.0)
+				Say("Harley relieves her bladder.")
+				ChangeIsOut
+			Sequence
+				not isSleeping
+				ChangeIsOut
+				Say("Harley races to the door and heads out.")
+				Wait(1.0)
+				repeat 2
+					sequence
+						random(0.2,0.7,0.1)
+							Say("Harley watches the squirrels race up the trees.")
+							Say("Harley sniffs around the grass.")
+							Say("Harley found a golden coin. Wow!")
+						Wait(5.0)
+				GoToBathroom(5)
+				IncreaseFun(10)
+				ChangeIsOut
+tree("RespondToSound")
+	Sequence
+		fallback
+				Sequence
+					isSleeping
+					random 0.7,0.2,0.1
+						Say("a floorboard squeaks.")
+						Say("something taps the windowpane.")
+						Say("Harley farts in her sleep.")
+					Wait(2.0)
+					Say("Harley wakes for a moment to look at the noise, then goes back to sleeping.")
+				Sequence
+					isPlaying
+					random 0.6,0.4
+						Say("a floorboard squeaks.")
+						Say("a bang is heard from miles away.")
+				Sequence
+					not isSleeping
+					not isEating
+					random
+						Sequence
+							Say("a floorboard squeaks.")
+							not isStarving
+							Wait(1.0)
+							Say("Harley's head turns in curiousity.")
+						Sequence
+							Say("sounds like something is scurrying across the floor.")
+							not isStarving
+							Wait(3.0)
+							Say("Harley chases the mouse!")
+					
 
 
 
