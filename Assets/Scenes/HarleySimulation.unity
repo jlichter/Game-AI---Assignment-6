@@ -593,10 +593,10 @@ RectTransform:
   m_Father: {fileID: 614604990}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMin: {x: 0.05767612, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.0000076293945, y: -0.000001013279}
-  m_SizeDelta: {x: -31.32, y: 0}
+  m_AnchoredPosition: {x: -14.023945, y: -0.0000009536743}
+  m_SizeDelta: {x: -17.32, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &831839131
 MonoBehaviour:
@@ -753,22 +753,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   harley: {fileID: 963194231}
-  gameCanvas: {fileID: 1244375559}
   gameScrollRect: {fileID: 1542226636}
   scrollNum: 1
   gameText: {fileID: 831839132}
+  harleyImage: {fileID: 1192303749}
+  gameOverSprite: {fileID: 21300000, guid: 8224cea1d47607c4d836960698412644, type: 3}
   hour: 0
   minute: 0
   second: 0
   days: 0
-  advancingDay: 0
-  advancingHour: 0
-  advancingMinutes: 0
+  periodOfDay: 
   gameOver: 0
   workHours: 0
   workMinutes: 0
   workSeconds: 0
   isAtWork: 0
+  hungerRate: 0.05
+  lonelyRate: 0.2
+  boredomRate: 0.2
+  tiredRate: 0.05
+  pottyRate: 0.15
+  tinkerRate: 0.36
 --- !u!114 &963194230
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -828,10 +833,16 @@ MonoBehaviour:
   needsSleep: 0
   isExhausted: 0
   isSleeping: 0
+  goalNapHours: 2
+  goalNapMinutes: 30
+  goalSleepHours: 2
+  goalSleepMinutes: 30
+  sleepSeconds: 0
+  sleepMinutes: 0
+  sleepHours: 0
   isOutside: 0
   needsPotty: 0
   peedInside: 0
-  isGettingLonely: 0
   isLonely: 0
   isMoreLonely: 0
   isVeryLonely: 0
@@ -913,7 +924,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 66}
-  m_SizeDelta: {x: 150, y: 150}
+  m_SizeDelta: {x: 120, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1192303749
 MonoBehaviour:
@@ -935,7 +946,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: a067fb83573da62409292a1a893583fe, type: 3}
+  m_Sprite: {fileID: 21300000, guid: bae2a5ad2675acd43b0a2d2a57c70ad8, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
